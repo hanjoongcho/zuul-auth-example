@@ -3,12 +3,17 @@ package shuaicj.example.security.gateway;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import shuaicj.example.security.common.JwtAuthenticationConfig;
 import shuaicj.example.security.common.JwtTokenAuthenticationFilter;
 
@@ -18,6 +23,7 @@ import shuaicj.example.security.common.JwtTokenAuthenticationFilter;
  * @author shuaicj 2017/10/18
  */
 @EnableWebSecurity
+@Configurable
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -47,7 +53,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers(config.getUrl()).permitAll()
                     .antMatchers("/backend/admin").hasRole("ADMIN")
                     .antMatchers("/backend/user").hasRole("USER")
-                    .antMatchers("/backend/guest").permitAll();
+                    .antMatchers("/backend/guest").permitAll()
+                .and().cors();
+    }
+    
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:9000");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
 
